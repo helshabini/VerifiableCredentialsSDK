@@ -5,8 +5,8 @@ namespace VerifiableCredentials.Web;
 
 public class IssuanceRequestOptions
 {
-    public bool IncludeQrCode { get; set; } = false;
-    public string DIDAuthority { get; set; }
+    public string Authority { get; set; }
+    public bool IncludeQrCode { get; set; }
     public string ClientName { get; set; }
     
     /// <summary>

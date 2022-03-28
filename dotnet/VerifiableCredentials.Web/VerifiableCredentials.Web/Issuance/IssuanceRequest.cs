@@ -1,15 +1,15 @@
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 
-namespace VerifiableCredentials.Web;
+namespace VerifiableCredentials.Web.Issuance;
 
 public class IssuanceRequest
     {
         public IssuanceRequest(IssuanceRequestOptions options)
         {
-            if (string.IsNullOrWhiteSpace(options.DIDAuthority))
+            if (string.IsNullOrWhiteSpace(options.Authority))
             {
-                throw new ArgumentException("DIDAuthority is required.", nameof(options.DIDAuthority));
+                throw new ArgumentException("DIDAuthority is required.", nameof(options.Authority));
             }
 
             if (string.IsNullOrWhiteSpace(options.ClientName))
@@ -28,7 +28,7 @@ public class IssuanceRequest
             }
             
             IncludeQrCode = options.IncludeQrCode;
-            Authority = options.DIDAuthority;
+            Authority = options.Authority;
 
             Registration = new RequestRegistration
             {

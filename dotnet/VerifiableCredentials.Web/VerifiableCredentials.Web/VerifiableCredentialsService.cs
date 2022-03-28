@@ -7,6 +7,16 @@ public class VerifiableCredentialsService : IVerifiableCredentialsService
 {
     private readonly List<IssuanceRequestOptions> _issuanceRequests;
 
+    public VerifiableCredentialsService(IEnumerable<IssuanceRequestOptions> optionsList)
+    {
+        _issuanceRequests = new List<IssuanceRequestOptions>();
+        
+        foreach (var options in optionsList)
+        {
+            _issuanceRequests.Add(options);
+        }
+    }
+    
     public VerifiableCredentialsService(IEnumerable<IOptionsMonitor<IssuanceRequestOptions>> optionsList)
     {
         _issuanceRequests = new List<IssuanceRequestOptions>();

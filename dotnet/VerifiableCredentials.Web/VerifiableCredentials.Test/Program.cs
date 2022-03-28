@@ -1,15 +1,13 @@
-using Microsoft.Identity.Web;
 using VerifiableCredentials.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-
 // Add Verifiable Credentials
 builder.Services.AddVerifiableCredentials()
-    .WithIssuanceRequest("RoomAccessVC", builder.Configuration.GetSection("RoomAccessVC"))
-    .WithIssuanceRequest("RoomAccessVC2", builder.Configuration.GetSection("RoomAccessVC2"));
+    .WithIssuanceRequest(config: builder.Configuration.GetSection("RoomAccessVC"))
+    .WithIssuanceRequest(config: builder.Configuration.GetSection("RoomAccessVC2"));
 
 
 

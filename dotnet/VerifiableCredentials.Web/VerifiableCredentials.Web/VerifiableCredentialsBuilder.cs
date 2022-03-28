@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace VerifiableCredentials.Web;
 
@@ -14,6 +13,8 @@ public class VerifiableCredentialsBuilder : IVerifiableCredentialsBuilder
     /// </summary>
     public IServiceCollection Services { get; private set; }
 
+    private readonly List<IssuanceRequestOptions> _issuanceRequestOptionsList;
+
     /// <summary>
     /// Constructor.
     /// </summary>
@@ -21,28 +22,33 @@ public class VerifiableCredentialsBuilder : IVerifiableCredentialsBuilder
     public VerifiableCredentialsBuilder(IServiceCollection services)
     {
         Services = services;
+        _issuanceRequestOptionsList = new List<IssuanceRequestOptions>();
     }
 
-    public IVerifiableCredentialsBuilder WithIssuanceRequest(string configName, Action<IssuanceRequestOptions> configureOptions)
+    public IVerifiableCredentialsBuilder WithIssuanceRequest(Action<IssuanceRequestOptions> configureOptions)
     {
-        //Services.AddOptions<IssuanceRequestOptions>(configName).Bind(configureOptions);
-        return this;
+        throw new NotImplementedException();
+        //Services.Configure<IssuanceRequestOptions>(configureOptions);
+        //return this;
     }
 
-    public IVerifiableCredentialsBuilder WithIssuanceRequest(string configName, IConfiguration config)
+    public IVerifiableCredentialsBuilder WithIssuanceRequest(IConfiguration config)
     {
         if (config == null)
         {
             throw new ArgumentNullException(nameof(config));
         }
         
-        Services.AddOptions<IssuanceRequestOptions>(configName).Bind(config);
-
+        var options = new IssuanceRequestOptions();
+        config.Bind(options);
+        _issuanceRequestOptionsList.Add(options);
+        
+        Services.Configure<IssuanceRequestOptions>(config);
         return this;
     }
 
     public IVerifiableCredentialsService Build()
     {
-        throw new NotImplementedException();
+        return new VerifiableCredentialsService(_issuanceRequestOptionsList);
     }
 }

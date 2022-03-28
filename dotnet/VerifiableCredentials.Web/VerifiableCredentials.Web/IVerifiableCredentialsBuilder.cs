@@ -4,9 +4,9 @@ namespace VerifiableCredentials.Web;
 
 public interface IVerifiableCredentialsBuilder
 {
-    IVerifiableCredentialsBuilder WithIssuanceRequest(string configName, Action<IssuanceRequestOptions> options);
+    IVerifiableCredentialsBuilder WithIssuanceRequest(Action<IssuanceRequestOptions> options);
     
-    IVerifiableCredentialsBuilder WithIssuanceRequest(string configName, IConfiguration config);
+    IVerifiableCredentialsBuilder WithIssuanceRequest(IConfiguration config);
 
     IVerifiableCredentialsService Build();
 }
