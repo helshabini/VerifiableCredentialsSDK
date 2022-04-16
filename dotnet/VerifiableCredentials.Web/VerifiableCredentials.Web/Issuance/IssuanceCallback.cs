@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace VerifiableCredentials.Web;
+namespace VerifiableCredentials.Web.Issuance;
 
 public class IssuanceCallback
 {
@@ -16,7 +16,7 @@ public class IssuanceCallback
     [JsonRequired]
     public Guid State { get; set; }
 
-    [JsonProperty("error")]
+    [JsonProperty("error", NullValueHandling=NullValueHandling.Ignore)]
     public IssuanceError Error { get; set; }
 
     public static IssuanceCallback FromJson(string json) =>

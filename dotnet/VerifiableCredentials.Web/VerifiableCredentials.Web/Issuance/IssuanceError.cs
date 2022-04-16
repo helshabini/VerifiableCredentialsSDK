@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 
-namespace VerifiableCredentials.Web;
+namespace VerifiableCredentials.Web.Issuance;
 
 public class IssuanceError
 {
-    [JsonProperty("code")]
+    [JsonProperty("code", NullValueHandling=NullValueHandling.Ignore)]
     public string Code { get; set; }
 
-    [JsonProperty("message")]
+    [JsonProperty("message", NullValueHandling=NullValueHandling.Ignore)]
     public string Message { get; set; }
 }

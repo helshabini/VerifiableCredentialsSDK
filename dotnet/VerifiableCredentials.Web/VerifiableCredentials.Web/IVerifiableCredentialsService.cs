@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using VerifiableCredentials.Web.Issuance;
 
 namespace VerifiableCredentials.Web;
 
 public interface IVerifiableCredentialsService
 {
-    Task<IActionResult> IssueCredentialAsync(string credentialType);
+    Task<IssuanceResponse> IssueCredentialAsync(string credentialType);
     
-    Task<IActionResult> IssueCredentialAsync(string credentialType, Dictionary<string, string> claims);
+    Task<IssuanceResponse> IssueCredentialAsync(string credentialType, Dictionary<string, string> claims);
 }

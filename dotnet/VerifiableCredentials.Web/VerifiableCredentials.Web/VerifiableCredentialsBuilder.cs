@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
+using VerifiableCredentials.Web.Issuance;
 
 namespace VerifiableCredentials.Web;
 
@@ -13,8 +15,6 @@ public class VerifiableCredentialsBuilder : IVerifiableCredentialsBuilder
     /// </summary>
     public IServiceCollection Services { get; private set; }
 
-    private readonly List<IssuanceRequestOptions> _issuanceRequestOptionsList;
-
     /// <summary>
     /// Constructor.
     /// </summary>
@@ -22,33 +22,26 @@ public class VerifiableCredentialsBuilder : IVerifiableCredentialsBuilder
     public VerifiableCredentialsBuilder(IServiceCollection services)
     {
         Services = services;
-        _issuanceRequestOptionsList = new List<IssuanceRequestOptions>();
     }
 
-    public IVerifiableCredentialsBuilder WithIssuanceRequest(Action<IssuanceRequestOptions> configureOptions)
+    /// <summary>
+    /// Add distributed request caches.
+    /// </summary>
+    /// <returns>the service collection.</returns>
+    public IVerifiableCredentialsBuilder AddDistributedTokenCaches()
     {
-        throw new NotImplementedException();
-        //Services.Configure<IssuanceRequestOptions>(configureOptions);
-        //return this;
+        Services.AddDistributedTokenCaches();
+        return this;
     }
-
-    public IVerifiableCredentialsBuilder WithIssuanceRequest(IConfiguration config)
+    
+    public IVerifiableCredentialsBuilder WithIssuanceRequests(IConfiguration config)
     {
         if (config == null)
         {
             throw new ArgumentNullException(nameof(config));
         }
         
-        var options = new IssuanceRequestOptions();
-        config.Bind(options);
-        _issuanceRequestOptionsList.Add(options);
-        
-        Services.Configure<IssuanceRequestOptions>(config);
+        Services.Configure<List<IssuanceRequestOptions>>(config);
         return this;
-    }
-
-    public IVerifiableCredentialsService Build()
-    {
-        return new VerifiableCredentialsService(_issuanceRequestOptionsList);
     }
 }

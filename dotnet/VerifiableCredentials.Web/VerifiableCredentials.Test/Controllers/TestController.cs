@@ -21,6 +21,7 @@ public class TestController : ControllerBase
     [HttpGet(Name = "Get")]
     public async Task<IActionResult> Get()
     {
-        return Ok(_vcService.ToString());
+        var response = await _vcService.IssueCredentialAsync("VerifiedCredentialExpert");
+        return Ok(response);
     }
 }

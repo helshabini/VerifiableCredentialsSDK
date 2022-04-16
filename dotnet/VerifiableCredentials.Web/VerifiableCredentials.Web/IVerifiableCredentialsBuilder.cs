@@ -1,12 +1,10 @@
 using Microsoft.Extensions.Configuration;
+using VerifiableCredentials.Web.Issuance;
 
 namespace VerifiableCredentials.Web;
 
 public interface IVerifiableCredentialsBuilder
 {
-    IVerifiableCredentialsBuilder WithIssuanceRequest(Action<IssuanceRequestOptions> options);
-    
-    IVerifiableCredentialsBuilder WithIssuanceRequest(IConfiguration config);
-
-    IVerifiableCredentialsService Build();
+    IVerifiableCredentialsBuilder AddDistributedTokenCaches();
+    IVerifiableCredentialsBuilder WithIssuanceRequests(IConfiguration config);
 }

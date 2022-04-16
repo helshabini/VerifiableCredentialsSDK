@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Security.Cryptography;
+using System.Web;
 using Newtonsoft.Json;
 
 namespace VerifiableCredentials.Web.Issuance;
@@ -40,10 +42,16 @@ public class IssuanceRequest
             Issuance = new Issuance
             {
                 Type = options.CredentialType,
-                Manifest = options.Manifest
+                Manifest = string.Format(CultureInfo.InvariantCulture, Constants.Manifest, options.TenantId,
+                    HttpUtility.UrlEncode(options.CredentialType))
             };
+
+            Options = options;
         }
 
+        [JsonIgnore]
+        public IssuanceRequestOptions Options { get; set; }
+        
         [JsonProperty("includeQRCode")]
         [JsonRequired]
         public bool IncludeQrCode { get; set; }
@@ -64,6 +72,9 @@ public class IssuanceRequest
         [JsonRequired]
         public Issuance Issuance { get; set; }
         
+        public object Clone() {
+            return MemberwiseClone();
+        }
         public static IssuanceRequest? FromJson(string json) => JsonConvert.DeserializeObject<IssuanceRequest>(json, IssuanceJsonConverter.Settings);
     }
 
@@ -77,16 +88,16 @@ public class IssuanceRequest
         [JsonRequired]
         public string State { get; set; }
 
-        [JsonProperty("headers")]
+        [JsonProperty("headers", NullValueHandling=NullValueHandling.Ignore)]
         public Headers Headers { get; set; }
     }
 
     public class Headers
     {
-        [JsonProperty("api-key")]
+        [JsonProperty("api-key", NullValueHandling=NullValueHandling.Ignore)]
         public string ApiKey { get; set; }
         
-        [JsonProperty("authorization")]
+        [JsonProperty("authorization", NullValueHandling=NullValueHandling.Ignore)]
         public string Authorization { get; set; }
     }
 
@@ -100,10 +111,10 @@ public class IssuanceRequest
         [JsonRequired]
         public string Manifest { get; set; }
 
-        [JsonProperty("pin")]
+        [JsonProperty("pin", NullValueHandling=NullValueHandling.Ignore)]
         public Pin Pin { get; set; }
 
-        [JsonProperty("claims")]
+        [JsonProperty("claims", NullValueHandling=NullValueHandling.Ignore)]
         public Dictionary<string, string> Claims { get; set; }
 
         // public Issuance(string type, string manifest, bool isMobile, Dictionary<string,string> claims)
@@ -139,20 +150,20 @@ public class IssuanceRequest
         [JsonRequired]
         public string Value { get; set; }
         
-        [JsonProperty("type")]
+        [JsonProperty("type", NullValueHandling=NullValueHandling.Ignore)]
         public PinType Type { get; set; }
 
         [JsonProperty("length")]
         [JsonRequired]
         public int Length { get; set; }
 
-        [JsonProperty("salt")]
+        [JsonProperty("salt", NullValueHandling=NullValueHandling.Ignore)]
         public string Salt { get; set; }
         
-        [JsonProperty("alg")]
+        [JsonProperty("alg", NullValueHandling=NullValueHandling.Ignore)]
         public PinAlgorithm Algorithm { get; set; }
         
-        [JsonProperty("iterations")]
+        [JsonProperty("iterations", NullValueHandling=NullValueHandling.Ignore)]
         public int Iterations { get; set; }
         
         public static Pin Generate(int length)
@@ -174,9 +185,9 @@ public class IssuanceRequest
         [JsonRequired]
         public string ClientName { get; set; }
         
-        [JsonProperty("logoUrl")]
+        [JsonProperty("logoUrl", NullValueHandling=NullValueHandling.Ignore)]
         public Uri? LogoUrl { get; set; }
         
-        [JsonProperty("termsOfServiceUrl")]
+        [JsonProperty("termsOfServiceUrl", NullValueHandling=NullValueHandling.Ignore)]
         public Uri? TermsOfServiceUrl { get; set; }
     }

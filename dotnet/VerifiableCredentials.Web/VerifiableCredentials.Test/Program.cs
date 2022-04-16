@@ -6,11 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add Verifiable Credentials
 builder.Services.AddVerifiableCredentials()
-    .WithIssuanceRequest(config: builder.Configuration.GetSection("RoomAccessVC"))
-    .WithIssuanceRequest(config: builder.Configuration.GetSection("RoomAccessVC2"));
+    .WithIssuanceRequests(config: builder.Configuration.GetSection("VCIssuanceOptions"));
 
-
-
+builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

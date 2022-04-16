@@ -1,7 +1,4 @@
-using System.Globalization;
-using System.Web;
-
-namespace VerifiableCredentials.Web;
+namespace VerifiableCredentials.Web.Issuance;
 
 public class IssuanceRequestOptions
 {
@@ -17,7 +14,7 @@ public class IssuanceRequestOptions
     /// <summary>
     /// Gets the OpenId Authority.
     /// </summary>
-    public string OpenIdAuthority => string.Format(CultureInfo.InvariantCulture, Constants.Instance, TenantId);
+    public string OpenIdAuthority { get; set; }
 
     /// <summary>
     /// Gets or sets the 'client_id'.
@@ -39,9 +36,6 @@ public class IssuanceRequestOptions
     /// <example>VerifiableCredentialsExpert</example>
     /// </summary>
     public string CredentialType { get; set; }
-
-    public string Manifest => string.Format(CultureInfo.InvariantCulture, Constants.Manifest, TenantId,
-        HttpUtility.UrlEncode(CredentialType));
 
     public string LogoUrl { get; set; }
     public string TermsOfServiceUrl { get; set; }
