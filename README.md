@@ -11,6 +11,13 @@ This is a work in progress, any contribution is appreciated.
 This software is not warrantied, sponsored, affiliated, or guaranteed by Microsoft in any way.
 See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
 
+## Benefits
+- Supports issuance for multiple credentials from separate authorities/tenants from within the same app
+- Supports verification for multiple credentials from separate authorities/tenants from within the same app (coming soon)
+- Built-in CLR objects for all Verifiable Credentials data structures
+- Uses a distributed add to handle multiple instances of the app (implemented but needs further testing)
+- Easily hookup the SDK using two lines of code using AspNetCore Dependency Injection.
+
 ## Usage
 
 ### In your `appsettings.json`
