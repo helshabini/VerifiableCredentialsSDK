@@ -141,6 +141,6 @@ public class MyClass
 ## Upcoming updates
 
 - Currently, the SDK does issuance only. Credential verification shall be added in the near future.
-- I'm also working on the ability to bubble up callback events somehow so that your app is also notified when an update has arrived. Currently, the only way to know if an update has arrived is to keep polling the status endpoint or call the RequestStatusAsync method.
-- I'm also working on adding a `Build()` method to the VerifiableCredentialsBuilder to be able to manually create your own VerifiableCredentialService instances and use it without having to use DependencyInjection.
-- Nuget package will created and published in the near future
+- I'm also working on the ability to bubble up callback events somehow so that your app is notified when an update has arrived. Currently, the only way to know if an update has arrived is to keep polling the status endpoint or call the RequestStatusAsync method.
+- I'm also working on adding a `Build()` method to the VerifiableCredentialsBuilder to be able to manually create a VerifiableCredentialService instance without having to use DependencyInjection.
+- Nuget package will be created and published in the near future
