@@ -15,7 +15,7 @@ See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
 - Supports issuance for multiple credentials from separate authorities/tenants from within the same app
 - Supports verification for multiple credentials from separate authorities/tenants from within the same app (coming soon)
 - Built-in CLR objects for all Verifiable Credentials data structures
-- Uses a distributed add to handle multiple instances of the app (implemented but needs further testing)
+- Uses a distributed cache to handle multiple instances of the app (implemented but needs further testing)
 - Easily hookup the SDK using two lines of code using AspNetCore Dependency Injection.
 
 ## Usage
