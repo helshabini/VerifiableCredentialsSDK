@@ -10,6 +10,4 @@ public interface IVerifiableCredentialsService
     Task<IssuanceStatus?> IssueCredentialAsync(string credentialType, Uri baseUrl, Dictionary<string, string> claims);
 
     Task<IssuanceStatus?> RequestStatusAsync(string requestId);
-    
-    Task<IssuanceStatus?> UpdateStatusAsync(IssuanceCallback callback, string apiKey);
 }

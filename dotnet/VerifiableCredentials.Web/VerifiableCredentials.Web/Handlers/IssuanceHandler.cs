@@ -6,9 +6,9 @@ namespace VerifiableCredentials.Web.Handlers;
 
 public class IssuanceHandler
 {
-    private readonly IVerifiableCredentialsService _service;
+    private readonly VerifiableCredentialsService _service;
 
-    public IssuanceHandler(IVerifiableCredentialsService service)
+    public IssuanceHandler(VerifiableCredentialsService service)
     {
         _service = service;
     }

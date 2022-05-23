@@ -33,8 +33,10 @@
                 var qrcode = new QRCode("qrcode", { width: 300, height: 300 });
                 var respIssuanceReq = null;
 
+                //Setting up the claims (modify according to your credential's expected claims or set to an empty string
                 var claims = JSON.stringify({'given_name': 'Megan', 'family_name': 'Bowen'})
                 signIn.addEventListener('click', () => {
+                    //Issuing request to the endpoint created by VC SDK. The last part of this Url is the name of the credential you want to issue
                     fetch('/verifiablecredentials/issuance/request/VerifiedCredentialExpert',
                     {
                         method: "POST",
@@ -67,6 +69,7 @@
                     }).catch(error => { console.log(error.message); })
 
                     var checkStatus = setInterval(function () {
+                        //Fetching status for the request via the endpoint created by the VC SDK
                         fetch('verifiablecredentials/issuance/status?id=' + respIssuanceReq.requestId )
                             .then(response => response.text())
                             .catch(error => document.getElementById("message").innerHTML = error)

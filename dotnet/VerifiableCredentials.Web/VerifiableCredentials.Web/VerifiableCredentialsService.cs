@@ -12,7 +12,7 @@ namespace VerifiableCredentials.Web;
 
 public class VerifiableCredentialsService : IVerifiableCredentialsService
 {
-    private Dictionary<string, IssuanceRequest> IssuanceRequests { get; }
+    public Dictionary<string, IssuanceRequest> IssuanceRequests { get; }
     private IDistributedCache Cache { get; }
 
     public VerifiableCredentialsService(IOptionsMonitor<List<IssuanceRequestOptions>> options, IDistributedCache cache)
@@ -259,7 +259,7 @@ public class VerifiableCredentialsService : IVerifiableCredentialsService
         return cacheItem;
     }
 
-    public async Task<IssuanceStatus?> UpdateStatusAsync(IssuanceCallback callback, string apiKey)
+    internal async Task<IssuanceStatus?> UpdateStatusAsync(IssuanceCallback callback, string apiKey)
     {
         if (callback == null)
             throw new NullReferenceException($"Callback cannot be null.");
