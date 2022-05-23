@@ -6,9 +6,9 @@ namespace VerifiableCredentials.Web.Handlers;
 
 public class IssuanceHandler
 {
-    private readonly VerifiableCredentialsService _service;
+    private readonly IVerifiableCredentialsService _service;
 
-    public IssuanceHandler(VerifiableCredentialsService service)
+    public IssuanceHandler(IVerifiableCredentialsService service)
     {
         _service = service;
     }
@@ -76,9 +76,10 @@ public class IssuanceHandler
         {
             //Should return a Bad Request
         }
-        
+
+        var service = _service as VerifiableCredentialsService;
         //Should try/catch this call and return equivalent http code
-        var status = await _service.UpdateStatusAsync(callback, apiKey);
+        var status = await service?.UpdateStatusAsync(callback, apiKey);
 
         context.Response.Clear();
         await context.Response.CompleteAsync();
