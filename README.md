@@ -64,11 +64,11 @@ app.UseVerifiableCredentials()
 
 The SDK uses a custom middleware to inject the following endpoints into your application:
 
-| Endpoint                                                  | Method | Parameters                                                           | Response        | Description                                                                                                                                                      |
-|-----------------------------------------------------------|--------|----------------------------------------------------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| /verifiablecredentials/issuance/request/{credential name} | POST   | - (Body/Optional) Claims in json format                              | Issuance Status | You can use this endpoint to issue a credential by name                                                                                                          |
-| /verifiablecredentials/issuance/status?id={request id}    | GET    | - (QueryString/Required) Request Id                                  | Issuance Status | You can use this endpoint to check the status of an issuance request                                                                                             |
-| /verifiablecredentials/issuance/callback                  | GET    | - (Header/Optional) ApiKey - (Body/Required) Callback in json format | None            | This endpoint is used by the Verifiable Credentials Service to notify the SDK of an update in a request's status. You should not use this endpoint in your code. |
+| Endpoint                                                  | Method | Parameters                                                                  | Response        | Description                                                                                                                                                              |
+|-----------------------------------------------------------|--------|-----------------------------------------------------------------------------|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| /verifiablecredentials/issuance/request/{credential name} | POST   | - (Body/Optional) Claims in json format                                     | Issuance Status | You can use this endpoint to issue a credential by name                                                                                                                  |
+| /verifiablecredentials/issuance/status?id={request id}    | GET    | - (QueryString/Required) Request Id                                         | Issuance Status | You can use this endpoint to check the status of an issuance request                                                                                                     |
+| /verifiablecredentials/issuance/callback                  | GET    | - (Header/Required) ApiKey <br /> - (Body/Required) Callback in json format | None            | This endpoint is used by Microsoft's Verifiable Credentials Service to notify the SDK of an update in a request's status. You should not use this endpoint in your code. |
 
 
 > Note:
@@ -137,6 +137,9 @@ public class MyClass
     }
 }
 ```
+
+## Running the sample
+This sample will not run in localhost. It must be either published or you must use a reverse proxy such as ngrok. This is because Microsoft's Verifiable Credentials Service requires a publicly accessible Url for the callback endpoint, so your app must exist on a publicly accessible Url.
 
 ## Upcoming updates
 
