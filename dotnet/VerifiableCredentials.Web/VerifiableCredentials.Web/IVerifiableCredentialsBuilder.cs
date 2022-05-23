@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using VerifiableCredentials.Web.Issuance;
 
 namespace VerifiableCredentials.Web;
 

@@ -49,7 +49,10 @@ else
     app.UseHsts();
 }
 
-app.UseVerifiableCredentials();
+app.UseVerifiableCredentials();//.OnCallBackReceivied(() =>
+//{
+    //Put an item into a stack or cache and it should automatically reflect in the UI.
+//});
 
 app.UseSession();
 app.UseHttpsRedirection();

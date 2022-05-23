@@ -33,13 +33,19 @@
                 var qrcode = new QRCode("qrcode", { width: 300, height: 300 });
                 var respIssuanceReq = null;
 
+                var claims = JSON.stringify({'given_name': 'Megan', 'family_name': 'Bowen'})
                 signIn.addEventListener('click', () => {
-                    fetch('/verifiablecredentials/issuance/request')
+                    fetch('/verifiablecredentials/issuance/request/VerifiedCredentialExpert',
+                    {
+                        method: "POST",
+                        body: claims
+                    })
                     .then(function(response) {
                         response.text()
                         .catch(error => document.getElementById("message").innerHTML = error)
                         .then(function(message) {
-                            respIssuanceReq = JSON.parse(message);
+                            var json = JSON.parse(message);
+                            respIssuanceReq = JSON.parse(json);
                             if( /Android/i.test(navigator.userAgent) ) {
                                 console.log(`Android device! Using deep link (${respIssuanceReq.url}).`);
                                 window.location.href = respIssuanceReq.url; setTimeout(function () {
@@ -61,15 +67,16 @@
                     }).catch(error => { console.log(error.message); })
 
                     var checkStatus = setInterval(function () {
-                        fetch('verifiablecredentials/issuance/issuanceresponse?id=' + respIssuanceReq.id )
+                        fetch('verifiablecredentials/issuance/status?id=' + respIssuanceReq.requestId )
                             .then(response => response.text())
                             .catch(error => document.getElementById("message").innerHTML = error)
                             .then(response => {
                                 if (response.length > 0) {
                                     console.log(response)
-                                    respMsg = JSON.parse(response);
+                                    json = JSON.parse(response);
+                                    respMsg = JSON.parse(json);
                                     // QR Code scanned, show pincode if pincode is required
-                                    if (respMsg.status == 'request_retrieved') {
+                                    if (respMsg.code == 'request_retrieved') {
                                         document.getElementById('message-wrapper').style.display = "block";
                                         document.getElementById('qrText').style.display = "none";
                                         document.getElementById('qrcode').style.display = "none";
@@ -77,22 +84,22 @@
                                         if (respMsg.pin) {
                                             document.getElementById('pinCodeText').style.display = "visible";
                                         }
-                                        document.getElementById('message').innerHTML = respMsg.message;
+                                        document.getElementById('message').innerHTML = json;
                                     }
-                                    if (respMsg.status == 'issuance_successful') {
+                                    if (respMsg.code == 'issuance_successful') {
                                         document.getElementById('pinCodeText').style.display = "none";
-                                        document.getElementById('message').innerHTML = respMsg.message;
+                                        document.getElementById('message').innerHTML = json;
                                         clearInterval(checkStatus);
                                     }
-                                    if (respMsg.status == 'issuance_error') {
+                                    if (respMsg.code == 'issuance_error') {
                                         document.getElementById('pinCodeText').style.display = "none";
                                         document.getElementById('message').innerHTML = "Issuance error occured, did you enter the wrong pincode? Please refresh the page and try again.";
-                                        document.getElementById('payload').innerHTML = "Payload: " + respMsg.payload;
+                                        document.getElementById('payload').innerHTML = "Payload: " + respMsg.error.code;
                                         clearInterval(checkStatus);
                                     }
                                 }
                             })
-                    }, 1500); //change this to higher interval if you use ngrok to prevent overloading the free tier service
+                    }, 10000); //change this to higher interval if you use ngrok to prevent overloading the free tier service
                 })
             </script>
             </div>

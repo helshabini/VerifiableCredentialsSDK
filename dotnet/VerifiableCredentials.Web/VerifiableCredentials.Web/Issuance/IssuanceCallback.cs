@@ -1,4 +1,6 @@
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace VerifiableCredentials.Web.Issuance;
 
@@ -10,6 +12,7 @@ public class IssuanceCallback
 
     [JsonProperty("code")]
     [JsonRequired]
+    [JsonConverter(typeof(StringEnumConverter))]
     public CallbackCode Code { get; set; }
 
     [JsonProperty("state")]
@@ -17,18 +20,20 @@ public class IssuanceCallback
     public Guid State { get; set; }
 
     [JsonProperty("error", NullValueHandling=NullValueHandling.Ignore)]
-    public IssuanceError Error { get; set; }
+    public IssuanceError? Error { get; set; }
 
-    public static IssuanceCallback FromJson(string json) =>
+    public static IssuanceCallback? FromJson(string json) =>
         JsonConvert.DeserializeObject<IssuanceCallback>(json, IssuanceJsonConverter.Settings);
+
+    public string ToJson() => JsonConvert.SerializeObject(this, IssuanceJsonConverter.Settings);
 }
 
 public enum CallbackCode
 {
-    [JsonProperty("request_retrieved")]
+    [EnumMember(Value = "request_retrieved")]
     RequestRetrieved,
-    [JsonProperty("issuance_successful")]
+    [EnumMember(Value = "issuance_successful")]
     IssuanceSuccessful,
-    [JsonProperty("Issuance_error")]
+    [EnumMember(Value = "Issuance_error")]
     IssuanceError
 }

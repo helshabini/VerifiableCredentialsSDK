@@ -1,16 +1,10 @@
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using VerifiableCredentials.Web.Helpers;
 using VerifiableCredentials.Web.Issuance;
 
@@ -18,8 +12,8 @@ namespace VerifiableCredentials.Web;
 
 public class VerifiableCredentialsService : IVerifiableCredentialsService
 {
-    public Dictionary<string, IssuanceRequest> IssuanceRequests { get; }
-    private IDistributedCache _cache { get; set; }
+    private Dictionary<string, IssuanceRequest> IssuanceRequests { get; }
+    private IDistributedCache Cache { get; }
 
     public VerifiableCredentialsService(IOptionsMonitor<List<IssuanceRequestOptions>> options, IDistributedCache cache)
     {
@@ -29,10 +23,10 @@ public class VerifiableCredentialsService : IVerifiableCredentialsService
             IssuanceRequests.Add(option.CredentialType, new IssuanceRequest(option));
         }
 
-        _cache = cache;
+        Cache = cache;
     }
 
-    public async Task<IssuanceResponse> IssueCredentialAsync(string credentialType)
+    public async Task<IssuanceStatus?> IssueCredentialAsync(string credentialType, Uri baseUrl)
     {
         if (!IssuanceRequests.ContainsKey(credentialType))
         {
@@ -43,37 +37,143 @@ public class VerifiableCredentialsService : IVerifiableCredentialsService
         
         var authResult = AcquireToken(template);
         Console.WriteLine(authResult);
+
+        if (authResult.Result == null) return null;
         
         var request = template.Clone() as IssuanceRequest ?? throw new InvalidOperationException();
         
-        request.Callback = new Callback()
+        request.Callback = new Callback
         {
-            Url = new Uri("https://299a-197-237-248-192.ngrok.io/verifiablecredentials/issuance"),
+            Url = new Uri(baseUrl + Constants.IssuancePath + "/callback"),
             State = Guid.NewGuid().ToString(),
-            Headers = new Headers()
+            Headers = new Headers
             {
                 ApiKey = Guid.NewGuid().ToString()
             }
         };
         
-        if (authResult != null)
+        var response = await IssueRequestAsync(string.Format(Constants.Endpoint, request.Options.TenantId), authResult.Result!.AccessToken, request);
+        
+        if (response == null)
+            throw new NullReferenceException("Invalid response.");
+        
+        if (response.IsSuccessStatusCode)
         {
-            var httpClient = new HttpClient();
-            var result = await CallWebApiAndProcessResultAsync(httpClient, string.Format(Constants.Endpoint, request.Options.TenantId), authResult.Result.AccessToken, request);
-            return result;
+            var json = await response.Content.ReadAsStringAsync();
+            var result = IssuanceResponse.FromJson(json);
+
+            if (result == null)
+                throw new SerializationException("Could not serialize response");
+                
+            var status = new IssuanceStatus
+            {
+                RequestId = result.RequestId,
+                Url = result.Url,
+                QrCode = result.QrCode,
+                Pin = request.Issuance.Pin?.Value ?? null,
+                ApiKey = request.Callback.Headers?.ApiKey
+            };
+            await Cache.SetAsync(result.RequestId.ToString(), Converters.JsonToByteArray(status.ToJson()), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+            return status;
+        }
+        else
+        {
+            Console.WriteLine($"Failed to call the web API: {response.StatusCode}");
+            var json  = await response.Content.ReadAsStringAsync();
+            var result = IssuanceResponse.FromJson(json);
+
+            if (result == null)
+                throw new SerializationException("Could not serialize response.");
+            
+            var status = new IssuanceStatus
+            {
+                RequestId = result.RequestId,
+                Error = result.Error
+            };
+
+            return status;
+        }
+    }
+    
+    public async Task<IssuanceStatus?> IssueCredentialAsync(string credentialType, Uri baseUrl, Dictionary<string, string> claims)
+    {
+        if (!IssuanceRequests.ContainsKey(credentialType))
+        {
+            throw new ArgumentException(message: "Credential type not found.", paramName: credentialType);
         }
 
-        return null;
+        var template = IssuanceRequests[credentialType];
+        
+        var authResult = AcquireToken(template);
+        Console.WriteLine(authResult);
+
+        if (authResult.Result == null) return null;
+        
+        var request = template.Clone() as IssuanceRequest ?? throw new InvalidOperationException();
+        
+        request.Callback = new Callback
+        {
+            Url = new Uri(baseUrl + Constants.IssuancePath + "/callback"),
+            State = Guid.NewGuid().ToString(),
+            Headers = new Headers
+            {
+                ApiKey = Guid.NewGuid().ToString()
+            }
+        };
+
+        request.Issuance.Claims = claims;
+        request.Issuance.Pin = Pin.Generate(4);
+        
+        var response = await IssueRequestAsync(string.Format(Constants.Endpoint, request.Options.TenantId), authResult.Result!.AccessToken, request);
+        
+        if (response == null)
+            throw new NullReferenceException("Invalid response.");
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var result = IssuanceResponse.FromJson(json);
+
+            if (result == null)
+                throw new SerializationException("Could not serialize response");
+                
+            var status = new IssuanceStatus
+            {
+                RequestId = result.RequestId,
+                Url = result.Url,
+                QrCode = result.QrCode,
+                Pin = request.Issuance.Pin?.Value ?? null,
+                ApiKey = request.Callback.Headers?.ApiKey
+            };
+            await Cache.SetAsync(result.RequestId.ToString(), Converters.JsonToByteArray(status.ToJson()), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+            return status;
+        }
+        else
+        {
+            Console.WriteLine($"Failed to call the web API: {response.StatusCode}");
+            var json  = await response.Content.ReadAsStringAsync();
+            var result = IssuanceResponse.FromJson(json);
+
+            if (result == null)
+                throw new SerializationException("Could not serialize response.");
+            
+            var status = new IssuanceStatus
+            {
+                RequestId = result.RequestId,
+                Error = result.Error
+            };
+
+            return status;
+        }
     }
-
-    public Task<IssuanceResponse> IssueCredentialAsync(string credentialType, Dictionary<string, string> claims)
-    {
-            throw new NotImplementedException();
-
-        throw new ArgumentException(message: "Credential type not found.", paramName: credentialType);
-    }
-
-    private async Task<AuthenticationResult?> AcquireToken(IssuanceRequest request)
+    
+    private static async Task<AuthenticationResult?> AcquireToken(IssuanceRequest request)
     {
         IConfidentialClientApplication app;
         /*if (!string.IsNullOrWhiteSpace(request.Options.ClientId))
@@ -123,54 +223,72 @@ public class VerifiableCredentialsService : IVerifiableCredentialsService
 
         return result;
     }
-    
-    public async Task<IssuanceResponse> CallWebApiAndProcessResultAsync(HttpClient httpClient, string webApiUrl, string accessToken, IssuanceRequest request)
+
+    private async Task<HttpResponseMessage?> IssueRequestAsync(string webApiUrl, string accessToken, IssuanceRequest request)
     {
-        if (!string.IsNullOrEmpty(accessToken))
+        if (string.IsNullOrEmpty(accessToken)) return null;
+        
+        using var httpClient = new HttpClient();
+        var defaultRequestHeaders = httpClient.DefaultRequestHeaders;
+        if (defaultRequestHeaders.Accept.All(m => m.MediaType != "application/json"))
         {
-            var defaultRequestHeaders = httpClient.DefaultRequestHeaders;
-            if (defaultRequestHeaders.Accept == null || !defaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
-            {
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            }
-            defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            
-            string body = string.Empty;
-            try
-            {
-                body = JsonConvert.SerializeObject(request);
-                await _cache.SetAsync(request.Callback.State, Converters.JsonToByteArray(body), new DistributedCacheEntryOptions()
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                });
-            }
-            catch (JsonSerializationException e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            StringContent httpContent = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await httpClient.PostAsync(webApiUrl, httpContent);
-            if (response.IsSuccessStatusCode)
-            {
-                string json = await response.Content.ReadAsStringAsync();
-                IssuanceResponse? result = IssuanceResponse.FromJson(json);
-                Console.ForegroundColor = ConsoleColor.Gray;
-                if (result != null) return result;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Failed to call the web API: {response.StatusCode}");
-                string content = await response.Content.ReadAsStringAsync();
-
-                // Note that if you got reponse.Code == 403 and reponse.content.code == "Authorization_RequestDenied"
-                // this is because the tenant admin as not granted consent for the application to call the Web API
-                Console.WriteLine($"Content: {content}");
-            }
-            Console.ResetColor();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
+        defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        
+        var httpContent = new StringContent(request.ToJson(), Encoding.UTF8, "application/json");
+        var response = await httpClient.PostAsync(webApiUrl, httpContent);
+        return response;
+    }
 
-        return null;
+    public async Task<IssuanceStatus?> RequestStatusAsync(string requestId)
+    {
+        if (string.IsNullOrEmpty(requestId))
+            throw new ArgumentNullException(nameof(requestId), "Request Id is required.");
+
+        var data = await Cache.GetAsync(requestId, CancellationToken.None);
+        if (data == null || data.Length == 0)
+            throw new KeyNotFoundException($"Cannot find status for request with Id {requestId}");
+
+        var json = Converters.ByteArrayToJson(data);
+
+        if (json == null)
+            throw new SerializationException($"Cannot serialize request with Id {requestId}");
+                
+        var cacheItem = IssuanceStatus.FromJson(json);
+        return cacheItem;
+    }
+
+    public async Task<IssuanceStatus?> UpdateStatusAsync(IssuanceCallback callback, string apiKey)
+    {
+        if (callback == null)
+            throw new NullReferenceException($"Callback cannot be null.");
+        
+        var data = await Cache.GetAsync(callback.RequestId.ToString(), CancellationToken.None);
+        if (data == null || data.Length == 0)
+            throw new KeyNotFoundException($"Cannot find status for request with Id {callback.RequestId}");
+        
+        var json = Converters.ByteArrayToJson(data);
+
+        if (json == null)
+            throw new SerializationException($"Cannot serialize request status with Id {callback.RequestId}");
+                
+        var status = IssuanceStatus.FromJson(json);
+        
+        if (status == null)
+            throw new SerializationException($"Cannot serialize request status with Id {callback.RequestId}");
+
+        if (status.ApiKey != apiKey)
+            throw new UnauthorizedAccessException($"Invalid ApiKey.");
+
+        status.Code = callback.Code;
+        callback.Error = callback.Error;
+
+        await Cache.SetAsync(status.RequestId.ToString(), Converters.JsonToByteArray(status.ToJson()), new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+        });
+
+        return status;
     }
 }

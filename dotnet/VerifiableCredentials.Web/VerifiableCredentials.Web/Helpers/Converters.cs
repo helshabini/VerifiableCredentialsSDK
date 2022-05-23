@@ -1,4 +1,5 @@
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 
 namespace VerifiableCredentials.Web.Helpers;
 
@@ -10,22 +11,15 @@ public static class Converters
         if(string.IsNullOrEmpty(json))
             return null;
 
-        MemoryStream ms = new MemoryStream();
-        BinaryWriter br = new BinaryWriter(ms);
-        br.Write(json);
-
-        return ms.ToArray();
+        return JsonSerializer.SerializeToUtf8Bytes(json);
     }
 
 // Convert a byte array to an Object
-    public static Object ByteArrayToObject(byte[] arrBytes)
+    public static string? ByteArrayToJson(byte[] bytes)
     {
-        MemoryStream memStream = new MemoryStream();
-        BinaryFormatter binForm = new BinaryFormatter();
-        memStream.Write(arrBytes, 0, arrBytes.Length);
-        memStream.Seek(0, SeekOrigin.Begin);
-        Object obj = (Object) binForm.Deserialize(memStream);
+        if (bytes.Length == 0)
+            return null;
 
-        return obj;
+        return JsonSerializer.Deserialize<string>(bytes);
     }
 }

@@ -13,7 +13,7 @@ public class VerifiableCredentialsBuilder : IVerifiableCredentialsBuilder
     /// <summary>
     /// The services being configured.
     /// </summary>
-    public IServiceCollection Services { get; private set; }
+    private IServiceCollection Services { get; set; }
 
     /// <summary>
     /// Constructor.

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
 namespace VerifiableCredentials.Web.Issuance;
@@ -21,17 +22,11 @@ public class IssuanceResponse
     public string Date { get; set; }
 
     [JsonProperty("error", NullValueHandling=NullValueHandling.Ignore)]
-    public Error Error { get; set; }
+    public IssuanceError Error { get; set; }
     
     public static IssuanceResponse? FromJson(string json) =>
         JsonConvert.DeserializeObject<IssuanceResponse>(json, IssuanceJsonConverter.Settings);
-}
 
-public class Error
-{
-    [JsonProperty("code", NullValueHandling=NullValueHandling.Ignore)]
-    public string Code { get; set; }
-
-    [JsonProperty("message", NullValueHandling=NullValueHandling.Ignore)]
-    public string Message { get; set; }
+    public string ToJson() =>
+        JsonConvert.SerializeObject(this, IssuanceJsonConverter.Settings);
 }

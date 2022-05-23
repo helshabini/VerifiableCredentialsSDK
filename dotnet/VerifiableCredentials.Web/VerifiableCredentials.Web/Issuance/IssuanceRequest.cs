@@ -58,7 +58,7 @@ public class IssuanceRequest
 
         [JsonProperty("callback")]
         [JsonRequired]
-        public Callback Callback { get; set; }
+        public Callback Callback { get; set; } = null!;
 
         [JsonProperty("authority")]
         [JsonRequired]
@@ -75,47 +75,51 @@ public class IssuanceRequest
         public object Clone() {
             return MemberwiseClone();
         }
-        public static IssuanceRequest? FromJson(string json) => JsonConvert.DeserializeObject<IssuanceRequest>(json, IssuanceJsonConverter.Settings);
+        public static IssuanceRequest? FromJson(string json) => 
+            JsonConvert.DeserializeObject<IssuanceRequest>(json, IssuanceJsonConverter.Settings);
+
+        public string ToJson() => JsonConvert.SerializeObject(this, IssuanceJsonConverter.Settings);
     }
 
     public class Callback
     {
+
         [JsonProperty("url")]
         [JsonRequired]
-        public Uri Url { get; set; }
+        public Uri Url { get; set; } = null!;
 
         [JsonProperty("state")]
         [JsonRequired]
-        public string State { get; set; }
+        public string State { get; set; } = null!;
 
         [JsonProperty("headers", NullValueHandling=NullValueHandling.Ignore)]
-        public Headers Headers { get; set; }
+        public Headers? Headers { get; set; }
     }
 
     public class Headers
     {
         [JsonProperty("api-key", NullValueHandling=NullValueHandling.Ignore)]
-        public string ApiKey { get; set; }
+        public string? ApiKey { get; set; }
         
         [JsonProperty("authorization", NullValueHandling=NullValueHandling.Ignore)]
-        public string Authorization { get; set; }
+        public string? Authorization { get; set; }
     }
 
     public class Issuance
     {
         [JsonProperty("type")]
         [JsonRequired]
-        public string Type { get; set; }
+        public string Type { get; set; } = null!;
 
         [JsonProperty("manifest")]
         [JsonRequired]
-        public string Manifest { get; set; }
+        public string Manifest { get; set; } = null!;
 
         [JsonProperty("pin", NullValueHandling=NullValueHandling.Ignore)]
-        public Pin Pin { get; set; }
+        public Pin? Pin { get; set; }
 
         [JsonProperty("claims", NullValueHandling=NullValueHandling.Ignore)]
-        public Dictionary<string, string> Claims { get; set; }
+        public Dictionary<string, string>? Claims { get; set; }
 
         // public Issuance(string type, string manifest, bool isMobile, Dictionary<string,string> claims)
         // {
@@ -148,32 +152,32 @@ public class IssuanceRequest
     {
         [JsonProperty("value")]
         [JsonRequired]
-        public string Value { get; set; }
-        
+        public string Value { get; set; } = null!;
+
         [JsonProperty("type", NullValueHandling=NullValueHandling.Ignore)]
-        public PinType Type { get; set; }
+        public PinType? Type { get; set; }
 
         [JsonProperty("length")]
         [JsonRequired]
         public int Length { get; set; }
 
         [JsonProperty("salt", NullValueHandling=NullValueHandling.Ignore)]
-        public string Salt { get; set; }
+        public string? Salt { get; set; }
         
         [JsonProperty("alg", NullValueHandling=NullValueHandling.Ignore)]
-        public PinAlgorithm Algorithm { get; set; }
+        public PinAlgorithm? Algorithm { get; set; }
         
         [JsonProperty("iterations", NullValueHandling=NullValueHandling.Ignore)]
-        public int Iterations { get; set; }
+        public int? Iterations { get; set; }
         
         public static Pin Generate(int length)
         {
             var pinMaxValue = (int)Math.Pow(10, length) - 1;
             var randomNumber = RandomNumberGenerator.GetInt32(1, pinMaxValue);
-            
+            var format = $"D{length}";
             return new Pin()
             {
-                Value = string.Format("{0:D" + length + "}", randomNumber),
+                Value = randomNumber.ToString(format),
                 Length = length
             };
         }
@@ -183,8 +187,8 @@ public class IssuanceRequest
     {
         [JsonProperty("clientName")]
         [JsonRequired]
-        public string ClientName { get; set; }
-        
+        public string ClientName { get; set; } = null!;
+
         [JsonProperty("logoUrl", NullValueHandling=NullValueHandling.Ignore)]
         public Uri? LogoUrl { get; set; }
         
