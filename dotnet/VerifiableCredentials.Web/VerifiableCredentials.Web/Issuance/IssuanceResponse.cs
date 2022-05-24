@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
 namespace VerifiableCredentials.Web.Issuance;
@@ -10,19 +9,19 @@ public class IssuanceResponse
     public Guid RequestId { get; set; }
 
     [JsonProperty("url", NullValueHandling=NullValueHandling.Ignore)] 
-    public string Url { get; set; }
+    public string Url { get; set; } = null!;
 
     [JsonProperty("expiry", NullValueHandling=NullValueHandling.Ignore)] 
     public int Expiry { get; set; }
 
     [JsonProperty("qrCode", NullValueHandling=NullValueHandling.Ignore)] 
-    public string QrCode { get; set; }
+    public string QrCode { get; set; } = null!;
 
     [JsonProperty("date", NullValueHandling=NullValueHandling.Ignore)]
-    public string Date { get; set; }
+    public DateTimeOffset Date { get; set; }
 
     [JsonProperty("error", NullValueHandling=NullValueHandling.Ignore)]
-    public IssuanceError Error { get; set; }
+    public IssuanceError Error { get; set; } = null!;
     
     public static IssuanceResponse? FromJson(string json) =>
         JsonConvert.DeserializeObject<IssuanceResponse>(json, IssuanceJsonConverter.Settings);

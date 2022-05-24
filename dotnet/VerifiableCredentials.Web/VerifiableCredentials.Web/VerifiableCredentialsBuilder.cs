@@ -40,8 +40,19 @@ public class VerifiableCredentialsBuilder : IVerifiableCredentialsBuilder
         {
             throw new ArgumentNullException(nameof(config));
         }
-        
+
         Services.Configure<List<IssuanceRequestOptions>>(config);
+        return this;
+    }
+
+    public IVerifiableCredentialsBuilder WithIssuanceRequests(Action<List<IssuanceRequestOptions>> options)
+    {
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options));
+        }
+
+        Services.Configure(options);
         return this;
     }
 }

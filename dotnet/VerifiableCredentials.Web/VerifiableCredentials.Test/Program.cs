@@ -5,7 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add Verifiable Credentials
 builder.Services.AddVerifiableCredentials()
-    .WithIssuanceRequests(config: builder.Configuration.GetSection("VCIssuanceOptions"));
+    .WithIssuanceRequests(builder.Configuration.GetSection("VCIssuanceOptions"))
+    .AddDistributedTokenCaches();
+
 
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
@@ -20,7 +22,6 @@ builder.Services.AddCors(o => o.AddPolicy("MyPolicy", policy =>
     // .WithOrigins("http://example.com","http://www.contoso.com");
 }));
 
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(1);//You can set Time   

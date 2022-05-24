@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace VerifiableCredentials.App.Pages
+namespace VerifiableCredentials.Test.Pages
 {
     public class IndexModel : PageModel
     {

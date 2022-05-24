@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Text;
+using AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
@@ -134,8 +135,8 @@ public class VerifiableCredentialsService : IVerifiableCredentialsService
         
         if (response.IsSuccessStatusCode)
         {
-            var json = await response.Content.ReadAsStringAsync();
-            var result = IssuanceResponse.FromJson(json);
+            var result = await response.Content.ReadAsJsonAsync<IssuanceResponse>();
+            //var result = IssuanceResponse.FromJson(json);
 
             if (result == null)
                 throw new SerializationException("Could not serialize response");
@@ -230,14 +231,8 @@ public class VerifiableCredentialsService : IVerifiableCredentialsService
         
         using var httpClient = new HttpClient();
         var defaultRequestHeaders = httpClient.DefaultRequestHeaders;
-        if (defaultRequestHeaders.Accept.All(m => m.MediaType != "application/json"))
-        {
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        }
         defaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        
-        var httpContent = new StringContent(request.ToJson(), Encoding.UTF8, "application/json");
-        var response = await httpClient.PostAsync(webApiUrl, httpContent);
+        var response = await httpClient.PostAsJsonAsync(webApiUrl, request);
         return response;
     }
 

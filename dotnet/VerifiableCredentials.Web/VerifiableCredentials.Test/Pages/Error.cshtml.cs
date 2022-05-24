@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Diagnostics;
 
-namespace VerifiableCredentials.App.Pages
+namespace VerifiableCredentials.Test.Pages
 {
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [IgnoreAntiforgeryToken]
     public class ErrorModel : PageModel
     {
-        public string RequestId { get; set; }
+        public string RequestId { get; set; } = null!;
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 

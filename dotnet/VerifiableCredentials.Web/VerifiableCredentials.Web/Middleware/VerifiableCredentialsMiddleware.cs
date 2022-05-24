@@ -33,6 +33,7 @@ public class VerifiableCredentialsMiddleware
             }
         }
 
-        await _next(context);
+        if (!context.Response.HasStarted)
+            await _next(context);
     }
 }

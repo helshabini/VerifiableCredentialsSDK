@@ -10,7 +10,7 @@ public class IssuanceStatus
     public Guid RequestId { get; set; }
     
     [JsonProperty("url", NullValueHandling=NullValueHandling.Ignore)] 
-    public string Url { get; set; }
+    public string Url { get; set; } = null!;
     
     [JsonProperty("qrCode", NullValueHandling=NullValueHandling.Ignore)] 
     public string? QrCode { get; set; }

@@ -46,8 +46,7 @@
                         response.text()
                         .catch(error => document.getElementById("message").innerHTML = error)
                         .then(function(message) {
-                            var json = JSON.parse(message);
-                            respIssuanceReq = JSON.parse(json);
+                            respIssuanceReq = JSON.parse(message);
                             if( /Android/i.test(navigator.userAgent) ) {
                                 console.log(`Android device! Using deep link (${respIssuanceReq.url}).`);
                                 window.location.href = respIssuanceReq.url; setTimeout(function () {
@@ -76,8 +75,7 @@
                             .then(response => {
                                 if (response.length > 0) {
                                     console.log(response)
-                                    json = JSON.parse(response);
-                                    respMsg = JSON.parse(json);
+                                    respMsg = JSON.parse(response);
                                     // QR Code scanned, show pincode if pincode is required
                                     if (respMsg.code == 'request_retrieved') {
                                         document.getElementById('message-wrapper').style.display = "block";
@@ -87,11 +85,11 @@
                                         if (respMsg.pin) {
                                             document.getElementById('pinCodeText').style.display = "visible";
                                         }
-                                        document.getElementById('message').innerHTML = json;
+                                        document.getElementById('message').innerHTML = respMsg;
                                     }
                                     if (respMsg.code == 'issuance_successful') {
                                         document.getElementById('pinCodeText').style.display = "none";
-                                        document.getElementById('message').innerHTML = json;
+                                        document.getElementById('message').innerHTML = respMsg;
                                         clearInterval(checkStatus);
                                     }
                                     if (respMsg.code == 'issuance_error') {

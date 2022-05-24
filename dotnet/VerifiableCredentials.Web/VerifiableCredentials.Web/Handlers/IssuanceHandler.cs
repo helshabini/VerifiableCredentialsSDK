@@ -39,9 +39,10 @@ public class IssuanceHandler
         //handle this
         
         status.ApiKey = null;
-        context.Response.Clear();
-        await context.Response.WriteAsJsonAsync(status.ToJson());
-        await context.Response.CompleteAsync();
+        
+        context.Response.StatusCode = StatusCodes.Status201Created;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(status.ToJson());
     }
     
     public async Task Status(HttpContext context)
@@ -60,9 +61,10 @@ public class IssuanceHandler
             //handle this
         
         status.ApiKey = null;
-        context.Response.Clear();
-        await context.Response.WriteAsJsonAsync(status.ToJson());
-        await context.Response.CompleteAsync();
+        
+        context.Response.StatusCode = StatusCodes.Status200OK;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(status.ToJson());
     }
     
     public async Task Callback(HttpContext context)
@@ -80,9 +82,6 @@ public class IssuanceHandler
         var service = _service as VerifiableCredentialsService;
         //Should try/catch this call and return equivalent http code
         var status = await service?.UpdateStatusAsync(callback, apiKey);
-
-        context.Response.Clear();
-        await context.Response.CompleteAsync();
         //Raise event for callback received.
     }
 }
